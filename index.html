@@ -138,7 +138,7 @@
   .washi-verse p{margin:0 0 8px;font-family:'Playfair Display',serif;font-style:italic;font-size:1.05rem;line-height:1.55;color:var(--navy-deep);}
   .verse-ref{display:block;font-size:.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-deep);font-family:'Lato',sans-serif;font-style:normal;}
   .msg-label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:8px;}
-  .message{width:100%;font-family:'Caveat',cursive;font-size:1.3rem;line-height:1.9rem;color:var(--espresso);background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(1.9rem - 1px),rgba(212,185,122,0.4) calc(1.9rem - 1px),rgba(212,185,122,0.4) 1.9rem);border:1px solid var(--cream-shadow);border-radius:8px;padding:10px 12px;resize:vertical;margin-bottom:18px;}
+  .message{width:100%;font-family:'Caveat',cursive;font-size:1.3rem;line-height:1.9rem;color:var(--espresso);background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(1.9rem - 1px),rgba(212,185,122,0.4) calc(1.9rem - 1px),rgba(212,185,122,0.4) 1.9rem);border:1px solid var(--cream-shadow);border-radius:8px;padding:10px 12px;resize:none;margin-bottom:18px;cursor:default;}
   .signoff{display:flex;align-items:baseline;gap:8px;font-family:'Caveat',cursive;font-size:1.4rem;margin-bottom:24px;flex-wrap:wrap;color:var(--navy-deep);}
   .from-input{font-family:'Caveat',cursive;font-size:inherit;font-weight:600;color:var(--burgundy);background:transparent;border:none;border-bottom:2px solid var(--burgundy);width:20ch;padding:0 2px 1px;}
   .card-actions{display:flex;gap:10px;flex-wrap:wrap;}
@@ -211,7 +211,7 @@
       <span class="verse-ref" id="verseRef"></span>
     </div>
     <label class="msg-label" for="message">your letter</label>
-    <textarea id="message" class="message" rows="8">Dear Father,
+    <textarea id="message" class="message" rows="8" readonly>Dear Father,
 
 I want to wish you a Happy Father's Day and thank you for all that you've done for me. I can only thank God that I was blessed with such amazing parents as you. You have been the foundation of my morals and beliefs, which have helped shape me into the person I am today.
 
@@ -374,8 +374,10 @@ I just want to say thank you once again, and I hope you have a wonderful rest of
       greetingVideo.muted = true;
       greetingVideo.play();
     });
-    playOverlay.classList.add('hiding');
-    setTimeout(function() { playOverlay.hidden = true; playOverlay.classList.remove('hiding'); }, 300);
+    playOverlay.style.transition = 'opacity 0.3s ease';
+    playOverlay.style.opacity = '0';
+    playOverlay.style.pointerEvents = 'none';
+    setTimeout(function() { playOverlay.style.display = 'none'; }, 350);
     greetingVideo.addEventListener('ended', revealLetter, { once: true });
   });
 
@@ -420,6 +422,9 @@ I just want to say thank you once again, and I hope you have a wonderful rest of
     videoStage.setAttribute('aria-hidden','true');
     if (hasRealVideoSource) { greetingVideo.pause(); greetingVideo.currentTime = 0; greetingVideo.muted = false; }
     unmuteHint.hidden = true;
+    playOverlay.style.display = '';
+    playOverlay.style.opacity = '';
+    playOverlay.style.pointerEvents = '';
     playOverlay.hidden = true;
     confettiLayer.innerHTML = '';
     washiVerse.hidden = true;
