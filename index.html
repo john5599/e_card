@@ -85,9 +85,10 @@
   }
   .video-frame video{display:block;width:100%;height:100%;object-fit:cover;background:#000;}
   .video-frame video[data-has-source="false"]{display:none;}
-  .unmute-hint{position:absolute;right:12px;bottom:12px;z-index:2;}
+  .unmute-hint{position:absolute;right:52px;bottom:12px;z-index:2;}
   .unmute-hint button{background:rgba(10,20,45,0.85);color:var(--gold-light);border:1px solid rgba(201,168,76,0.4);border-radius:999px;padding:8px 14px;font-size:.8rem;font-weight:600;cursor:pointer;}
-  .play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,20,45,0.6);z-index:2;}
+  .play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,20,45,0.6);z-index:2;transition:opacity .3s ease;}
+  .play-overlay.hiding{opacity:0;pointer-events:none;}
   .play-overlay button{
     width:72px;height:72px;border-radius:50%;border:none;
     background:linear-gradient(135deg,var(--gold-light),var(--gold-deep));
@@ -95,6 +96,15 @@
     box-shadow:0 8px 24px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:transform .2s ease;
   }
   .play-overlay button:hover{transform:scale(1.08);}
+  .fullscreen-btn{
+    position:absolute;bottom:12px;right:12px;z-index:3;
+    width:36px;height:36px;border-radius:8px;border:1px solid rgba(201,168,76,0.35);
+    background:rgba(10,20,45,0.8);color:var(--gold-light);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .2s ease, transform .15s ease;
+  }
+  .fullscreen-btn:hover{background:rgba(10,20,45,1);transform:scale(1.1);}
+  .fullscreen-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
   .placeholder-scene{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;overflow:hidden;background:linear-gradient(135deg,var(--navy-deep),var(--navy));}
   .route{position:absolute;left:6%;right:6%;top:48%;height:0;border-top:2px dashed rgba(201,168,76,0.3);}
   .flying-icon{position:absolute;left:6%;bottom:24%;width:34px;height:34px;color:var(--gold);opacity:0;}
@@ -169,6 +179,12 @@
       <div class="play-overlay" id="playOverlay" hidden>
         <button id="playBtn" type="button" aria-label="Play video">▶</button>
       </div>
+      <button class="fullscreen-btn" id="fullscreenBtn" type="button" aria-label="Fullscreen">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+      </button>
       <div class="placeholder-scene" id="placeholderScene">
         <div class="route"></div>
         <div class="flying-icon">
@@ -358,8 +374,42 @@ I just want to say thank you once again, and I hope you have a wonderful rest of
       greetingVideo.muted = true;
       greetingVideo.play();
     });
-    playOverlay.hidden = true;
+    playOverlay.classList.add('hiding');
+    setTimeout(function() { playOverlay.hidden = true; playOverlay.classList.remove('hiding'); }, 300);
     greetingVideo.addEventListener('ended', revealLetter, { once: true });
+  });
+
+  var fullscreenBtn = document.getElementById('fullscreenBtn');
+  var fsExitSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>';
+  var fsEnterSvg = fullscreenBtn.innerHTML;
+  var videoFrame = document.querySelector('.video-frame');
+
+  fullscreenBtn.addEventListener('click', function() {
+    var el = videoFrame;
+    if (!document.fullscreenElement) {
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (req) req.call(el);
+    } else {
+      var exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+      if (exit) exit.call(document);
+    }
+  });
+
+  document.addEventListener('fullscreenchange', function() {
+    if (document.fullscreenElement) {
+      fullscreenBtn.innerHTML = fsExitSvg;
+      fullscreenBtn.setAttribute('aria-label', 'Exit fullscreen');
+    } else {
+      fullscreenBtn.innerHTML = fsEnterSvg;
+      fullscreenBtn.setAttribute('aria-label', 'Fullscreen');
+    }
+  });
+  document.addEventListener('webkitfullscreenchange', function() {
+    if (document.webkitFullscreenElement) {
+      fullscreenBtn.innerHTML = fsExitSvg;
+    } else {
+      fullscreenBtn.innerHTML = fsEnterSvg;
+    }
   });
 
   resetBtn.addEventListener('click', function() {
